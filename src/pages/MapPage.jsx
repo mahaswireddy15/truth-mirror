@@ -111,6 +111,18 @@ const LOCATION_COORDS = {
   'patna':        [25.5941, 85.1376],
   'surat':        [21.1702, 72.8311],
   'coimbatore':   [11.0168, 76.9558],
+  // Telangana districts
+  'warangal':     [17.9784, 79.5941],
+  'karimnagar':   [18.4386, 79.1288],
+  'khammam':      [17.2473, 80.1514],
+  'nalgonda':     [17.0491, 79.2673],
+  'mahbubnagar':  [16.7488, 77.9862],
+  'mahabubnagar': [16.7488, 77.9862],
+  'nizamabad':    [18.6725, 78.0941],
+  'adilabad':     [19.6641, 78.5320],
+  // Andhra Pradesh districts
+  'guntur':       [16.3007, 80.4428],
+  'kurnool':      [15.8281, 78.0373],
 };
 
 // Deterministic string hash
@@ -227,6 +239,14 @@ export default function MapPage() {
   // Log-scale radius so dense areas don't dwarf sparse ones
   const getRadius = (count) => Math.min(10 + Math.log(count + 1) * 7, 38);
 
+  // High-suffering districts get red/orange regardless of category
+  const getSufferingColor = (count, categoryColor) => {
+    if (count >= 10) return '#DC2626'; // intense red  — very high suffering
+    if (count >= 6)  return '#F97316'; // orange       — high suffering
+    if (count >= 3)  return '#FBBF24'; // amber        — moderate suffering
+    return categoryColor;              // category hue — low suffering
+  };
+
   const handleDistrictSelect = (dist) => {
     setDistrictFilter(dist);
     setSelected(null);
@@ -308,6 +328,7 @@ export default function MapPage() {
 
           {clusters.map((cluster) => {
             const cfg = CATEGORY_CONFIG[cluster.dominantCat] ?? { color: '#6B7280' };
+            const markerColor = getSufferingColor(cluster.count, cfg.color);
             const isSelected = selected?.district === cluster.district;
             return (
               <CircleMarker
@@ -315,8 +336,8 @@ export default function MapPage() {
                 center={cluster.coords}
                 radius={getRadius(cluster.count)}
                 pathOptions={{
-                  color:       isSelected ? '#ffffff' : cfg.color,
-                  fillColor:   cfg.color,
+                  color:       isSelected ? '#ffffff' : markerColor,
+                  fillColor:   markerColor,
                   fillOpacity: isSelected ? 0.92 : 0.68,
                   weight:      isSelected ? 3 : 1.5,
                 }}
