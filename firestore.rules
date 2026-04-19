@@ -1,0 +1,17 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reports collection rules
+    match /reports/{reportId} {
+      // Anyone can read reports (public feed)
+      allow read: if true;
+      
+      // Since Truth Mirror doesn't have an auth system yet, we temporarily allow public create
+      // so the app can be tested. Once Auth is added, change to: if request.auth != null;
+      allow create: if true;
+      
+      // Only admins should be able to update/delete (to prevent tampering)
+      allow update, delete: if request.auth != null && request.auth.token.admin == true;
+    }
+  }
+}
